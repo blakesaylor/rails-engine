@@ -58,6 +58,7 @@ GEM
       rack-test (>= 0.6.3)
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
+    coderay (1.1.3)
     concurrent-ruby (1.1.10)
     crack (0.4.5)
       rexml
@@ -78,6 +79,8 @@ GEM
     hashdiff (1.0.1)
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
+    jsonapi-serializer (2.2.0)
+      activesupport (>= 4.2)
     launchy (2.5.0)
       addressable (~> 2.7)
     listen (3.1.5)
@@ -102,6 +105,9 @@ GEM
       capybara (>= 1.1)
       rspec (>= 2.14)
     pg (1.4.3)
+    pry (0.14.1)
+      coderay (~> 1.1)
+      method_source (~> 1.0)
     public_suffix (5.0.0)
     puma (3.12.6)
     racc (1.6.0)
@@ -203,10 +209,12 @@ DEPENDENCIES
   capybara
   factory_bot_rails
   faker
+  jsonapi-serializer
   launchy
   listen (>= 3.0.5, < 3.2)
   orderly
   pg (>= 0.18, < 2.0)
+  pry
   puma (~> 3.11)
   rails (~> 5.2.6)
   rspec-rails
