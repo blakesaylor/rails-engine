@@ -4,7 +4,13 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def show
-    render json: ItemSerializer.new(Item.find(params[:id]))
+    if Item.exists?(params[:id])
+      render json: ItemSerializer.new(Item.find(params[:id]))
+    else
+      render json: { 
+          error: 'There are no items with that ID' 
+        }, status: 404
+    end
   end
 
   def create
@@ -13,9 +19,7 @@ class Api::V1::ItemsController < ApplicationController
 
   def update
     item = Item.find(params[:id])
-
-    # I probably need to utilize a Facade to do this part 
-    # Need to just call the facade to handle all of the logic
+    
     if item.update(item_params)
       render json: ItemSerializer.new(Item.find(params[:id]))
     else
@@ -25,8 +29,6 @@ class Api::V1::ItemsController < ApplicationController
 
   def destroy
     Item.destroy(params[:id])
-      # render body: nil, status: :no_content
-    # render json: Item.delete(params[:id])
   end
 
   private
