@@ -172,15 +172,4 @@ describe "Items API" do
     expect(Item.count).to eq(0)
     expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
   end
-
-  # # Extra check
-  # it "can destroy an item" do
-  #   merchant = create(:merchant)
-  #   item = create(:item, merchant_id: merchant.id)
-
-  #   expect{ delete "/api/v1/items/#{item.id}" }.to change(Item, :count).by(-1)
-
-  #   expect(response).to be_success
-  #   expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
-  # end
 end
