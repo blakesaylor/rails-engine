@@ -120,6 +120,44 @@ describe "Items API" do
     expect(created_item.merchant_id).to eq(item_params[:merchant_id])
   end
 
+  it "can update an existing item" do
+    merchant = create(:merchant)
+    id = create(:item, merchant_id: merchant.id).id
+
+    previous_name = Item.last.name
+
+    updated_name = Faker::Food.dish
+
+    item_params = { name: updated_name }
+
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    patch "/api/v1/items/#{id}", headers: headers, params: JSON.generate({item: item_params})
+    item = Item.find_by(id: id)
+
+    expect(response).to be_successful
+    expect(item.name).to_not eq(previous_name)
+    expect(item.name).to eq(updated_name)
+  end
+
+  it "renders a 404 if a merchant ID doesn't exist when updating" do
+    merchant = create(:merchant)
+    id = create(:item, merchant_id: merchant.id).id
+
+    previous_name = Item.last.name
+
+    updated_name = Faker::Food.dish
+
+    item_params = { name: updated_name,
+                    merchant_id: merchant.id + 9000 }
+
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    patch "/api/v1/items/#{id}", headers: headers, params: JSON.generate({item: item_params})
+
+    expect(response.status).to eq 404
+  end
+
   it "can destroy an item" do
     merchant = create(:merchant)
     item = create(:item, merchant_id: merchant.id)
