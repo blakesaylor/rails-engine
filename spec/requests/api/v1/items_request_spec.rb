@@ -73,4 +73,76 @@ describe "Items API" do
     expect(item[:data][:attributes][:merchant_id]).to eq Item.find(item[:data][:id])[:merchant_id]
     expect(item[:data][:attributes][:merchant_id]).to be_an(Integer)
   end
+
+  it "can create a new item" do
+    merchant = create(:merchant)
+    item_params = ({
+                    name: Faker::Food.dish,
+                    description: Faker::Food.description,
+                    unit_price: Faker::Number.decimal(r_digits: 2),
+                    merchant_id: merchant.id
+                  })
+
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    post "/api/v1/items", headers: headers, params: JSON.generate(item: item_params)
+
+    item = JSON.parse(response.body, symbolize_names: true)
+
+    expect(item[:data]).to have_key(:id)
+    expect(item[:data][:id]).to be_an(String)
+
+    expect(item[:data]).to have_key(:type)
+    expect(item[:data][:type]).to be_an(String)
+    expect(item[:data][:type]).to eq('item')
+
+    expect(item[:data]).to have_key(:attributes)
+    expect(item[:data][:attributes]).to be_an(Hash)
+
+    expect(item[:data][:attributes][:name]).to eq Item.find(item[:data][:id])[:name]
+    expect(item[:data][:attributes][:name]).to be_an(String)
+
+    expect(item[:data][:attributes][:description]).to eq Item.find(item[:data][:id])[:description]
+    expect(item[:data][:attributes][:description]).to be_an(String)
+
+    expect(item[:data][:attributes][:unit_price]).to eq Item.find(item[:data][:id])[:unit_price]
+    expect(item[:data][:attributes][:unit_price]).to be_an(Float)
+
+    expect(item[:data][:attributes][:merchant_id]).to eq Item.find(item[:data][:id])[:merchant_id]
+    expect(item[:data][:attributes][:merchant_id]).to be_an(Integer)
+
+    created_item = Item.last
+
+    expect(response).to be_successful
+    expect(created_item.name).to eq(item_params[:name])
+    expect(created_item.description).to eq(item_params[:description])
+    expect(created_item.unit_price).to eq(item_params[:unit_price])
+    expect(created_item.merchant_id).to eq(item_params[:merchant_id])
+  end
+
+  it "can destroy an item" do
+    merchant = create(:merchant)
+    item = create(:item, merchant_id: merchant.id)
+
+    expect(Item.count).to eq(1)
+
+    delete "/api/v1/items/#{item.id}"
+
+    expect(response).to be_successful
+    expect(response.status).to eq 204
+    # expect(response.body).to eq nil
+    expect(Item.count).to eq(0)
+    expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
+  end
+
+  # # Extra check
+  # it "can destroy an item" do
+  #   merchant = create(:merchant)
+  #   item = create(:item, merchant_id: merchant.id)
+
+  #   expect{ delete "/api/v1/items/#{item.id}" }.to change(Item, :count).by(-1)
+
+  #   expect(response).to be_success
+  #   expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
+  # end
 end
