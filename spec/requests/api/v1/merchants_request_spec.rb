@@ -46,4 +46,54 @@ describe "Merchants API" do
     expect(merchant[:data][:attributes]).to be_an(Hash)
     expect(merchant[:data][:attributes][:name]).to eq Merchant.find(merchant[:data][:id])[:name]
   end
+
+  it 'can get all items for a merchant' do
+    id = create(:merchant).id
+    create_list(:item, 10, merchant_id: id)
+
+    get "/api/v1/merchants/#{id}/items"
+
+    merchant_items = JSON.parse(response.body, symbolize_names: true)
+    
+    expect(response).to be_successful
+
+    expect(merchant_items[:data].count).to eq 10
+
+    merchant_items[:data].each do |merchant_item|
+      expect(merchant_item).to have_key(:id)
+      expect(merchant_item[:id]).to be_an(String)
+
+      expect(merchant_item).to have_key(:type)
+      expect(merchant_item[:type]).to be_an(String)
+      expect(merchant_item[:type]).to eq('item')
+
+      expect(merchant_item).to have_key(:attributes)
+      expect(merchant_item[:attributes]).to be_an(Hash)
+
+      expect(merchant_item[:attributes]).to have_key(:name)
+      expect(merchant_item[:attributes][:name]).to be_an(String)
+
+      expect(merchant_item[:attributes]).to have_key(:description)
+      expect(merchant_item[:attributes][:description]).to be_an(String)
+
+      expect(merchant_item[:attributes]).to have_key(:unit_price)
+      expect(merchant_item[:attributes][:unit_price]).to be_an(Float)
+
+      expect(merchant_item[:attributes]).to have_key(:merchant_id)
+      expect(merchant_item[:attributes][:merchant_id]).to be_an(Integer)
+    end
+  end
+
+  it 'returns a 404 if a merchant is not found' do
+    id = create(:merchant).id
+    create_list(:item, 10, merchant_id: id)
+
+    false_id = id + 9000
+
+    get "/api/v1/merchants/#{false_id}/items"
+
+    expect(response).to_not be_successful
+    expect(response.status).to eq 404
+    expect(response.body).to eq " "
+    end
 end
