@@ -47,6 +47,24 @@ describe "Merchants API" do
     expect(merchant[:data][:attributes][:name]).to eq Merchant.find(merchant[:data][:id])[:name]
   end
 
+  # Add test for 404 if merchant ID does not exist
+  it 'returns a 404 if a merchant ID does not exist' do
+    id = create(:merchant).id
+    create_list(:item, 10, merchant_id: id)
+
+    false_id = id + 9000
+
+    get "/api/v1/merchants/#{false_id}"
+
+    output = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to_not be_successful
+    expect(response.status).to eq 404
+
+    expect(output).to have_key(:error)
+    expect(output[:error]).to eq "There are no merchants with that ID"
+  end
+
   it 'can get all items for a merchant' do
     id = create(:merchant).id
     create_list(:item, 10, merchant_id: id)
@@ -84,7 +102,7 @@ describe "Merchants API" do
     end
   end
 
-  it 'returns a 404 if a merchant is not found' do
+  it 'returns a 404 if a merchant ID does not exist (merchant items)' do
     id = create(:merchant).id
     create_list(:item, 10, merchant_id: id)
 
