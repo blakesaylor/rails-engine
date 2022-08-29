@@ -174,4 +174,50 @@ describe "Items API" do
     expect(Item.count).to eq(0)
     expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
   end
+
+  it "can return the merchant for a given item" do
+    merchant = create(:merchant)
+    item = create(:item, merchant_id: merchant.id)
+    
+    get "/api/v1/items/#{item.id}/merchant"
+
+    merchant_output = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to be_successful
+    expect(response.status).to eq 200
+
+    expect(merchant_output).to have_key(:data)
+
+    expect(merchant_output[:data]).to have_key(:id)
+    expect(merchant_output[:data][:id]).to be_an(String)
+    expect(merchant_output[:data][:id]).to eq merchant.id.to_s
+
+    expect(merchant_output[:data]).to have_key(:type)
+    expect(merchant_output[:data][:type]).to be_an(String)
+    expect(merchant_output[:data][:type]).to eq 'merchant'
+
+    expect(merchant_output[:data]).to have_key(:attributes)
+    expect(merchant_output[:data][:attributes]).to be_an(Hash)
+
+    expect(merchant_output[:data][:attributes]).to have_key(:name)
+    expect(merchant_output[:data][:attributes][:name]).to be_an(String)
+    expect(merchant_output[:data][:attributes][:name]).to eq merchant.name
+  end
+
+  it 'returns a 404 if an item is not found' do
+    id = create(:merchant).id
+    create_list(:item, 10, merchant_id: id)
+
+    false_id = id + 9000
+
+    get "/api/v1/items/#{false_id}/merchant"
+
+    output = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to_not be_successful
+    expect(response.status).to eq 404
+
+    expect(output).to have_key(:error)
+    expect(output[:error]).to eq "There are no items with that ID"
+  end
 end

@@ -5,7 +5,6 @@ class Api::V1::MerchantItemsController < ApplicationController
       render json: ItemSerializer.new(merchant.items)
     else
       render json: { 
-        status: 404, 
         error: 'There are no merchants with that ID' 
       }, status: 404
     end

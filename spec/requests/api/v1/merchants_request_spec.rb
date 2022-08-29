@@ -92,8 +92,12 @@ describe "Merchants API" do
 
     get "/api/v1/merchants/#{false_id}/items"
 
+    output = JSON.parse(response.body, symbolize_names: true)
+
     expect(response).to_not be_successful
     expect(response.status).to eq 404
-    expect(response.body).to eq " "
-    end
+
+    expect(output).to have_key(:error)
+    expect(output[:error]).to eq "There are no merchants with that ID"
+  end
 end
