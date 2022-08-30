@@ -74,6 +74,23 @@ describe "Items API" do
     expect(item[:data][:attributes][:merchant_id]).to be_an(Integer)
   end
 
+  it 'returns a 404 if an item ID does not exist' do
+    merchant_id = create(:merchant).id
+    item_id = create(:item, merchant_id: merchant_id).id
+
+    false_id = item_id + 9000
+
+    get "/api/v1/items/#{false_id}"
+
+    output = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to_not be_successful
+    expect(response.status).to eq 404
+
+    expect(output).to have_key(:error)
+    expect(output[:error]).to eq "There are no items with that ID"
+  end
+
   it "can create a new item" do
     merchant = create(:merchant)
     item_params = ({
@@ -88,6 +105,9 @@ describe "Items API" do
     post "/api/v1/items", headers: headers, params: JSON.generate(item: item_params)
 
     item = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to be_successful
+    expect(response.status).to eq 201
 
     expect(item[:data]).to have_key(:id)
     expect(item[:data][:id]).to be_an(String)
@@ -118,6 +138,23 @@ describe "Items API" do
     expect(created_item.description).to eq(item_params[:description])
     expect(created_item.unit_price).to eq(item_params[:unit_price])
     expect(created_item.merchant_id).to eq(item_params[:merchant_id])
+  end
+
+  it "renders a 404 if an item can't be created" do
+    merchant = create(:merchant)
+    item_params = ({
+                    name: Faker::Food.dish,
+                    description: Faker::Food.description,
+                    unit_price: Faker::Food.dish,
+                    merchant_id: merchant.id
+                  })
+
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    post "/api/v1/items", headers: headers, params: JSON.generate(item: item_params)
+
+    expect(response).to_not be_successful
+    expect(response.status).to eq 404
   end
 
   it "can update an existing item" do
@@ -173,23 +210,6 @@ describe "Items API" do
     # expect(response.body).to eq nil
     expect(Item.count).to eq(0)
     expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
-  end
-
-  it 'returns a 404 if an item ID does not exist' do
-    merchant_id = create(:merchant).id
-    item_id = create(:item, merchant_id: merchant_id).id
-
-    false_id = item_id + 9000
-
-    get "/api/v1/items/#{false_id}"
-
-    output = JSON.parse(response.body, symbolize_names: true)
-
-    expect(response).to_not be_successful
-    expect(response.status).to eq 404
-
-    expect(output).to have_key(:error)
-    expect(output[:error]).to eq "There are no items with that ID"
   end
 
   it "can return the merchant for a given item" do
