@@ -33,7 +33,11 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def destroy
-    Item.destroy(params[:id])
+    if Item.exists?(params[:id])
+      Item.destroy(params[:id])
+    else
+      render status: 404
+    end
   end
 
   private

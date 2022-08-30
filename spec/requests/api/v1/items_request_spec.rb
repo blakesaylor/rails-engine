@@ -212,6 +212,17 @@ describe "Items API" do
     expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
   end
 
+  it "returns a 404 if an item id to be deleted doesn't exist" do
+    merchant = create(:merchant)
+    item = create(:item, merchant_id: merchant.id)
+    false_id = item.id + 9000
+
+    delete "/api/v1/items/#{false_id}"
+
+    expect(response).to_not be_successful
+    expect(response.status).to eq 404
+  end
+
   it "can return the merchant for a given item" do
     merchant = create(:merchant)
     item = create(:item, merchant_id: merchant.id)
