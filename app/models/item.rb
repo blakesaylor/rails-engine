@@ -6,4 +6,8 @@ class Item < ApplicationRecord
   validates_presence_of :merchant_id
   belongs_to :merchant
   has_many :invoice_items
+
+  def self.find_all(name)
+    items = where('name ILIKE ?', "%#{name}%")
+  end
 end
