@@ -3,11 +3,11 @@ class Merchant < ApplicationRecord
   has_many :items
   has_many :invoices
 
-  def self.find_one(name)
-    merchant = find_by('name ILIKE ?', "%#{name}%")
+  def self.find_all(name)
+    where('name ILIKE ?', "%#{name}%")
   end
 
-  def self.find_all(name)
-    merchants = where('name ILIKE ?', "%#{name}%")
+  def self.find_one(name)
+    find_by('name ILIKE ?', "%#{name}%")
   end
 end
