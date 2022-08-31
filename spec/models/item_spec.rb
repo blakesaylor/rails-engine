@@ -19,6 +19,34 @@ RSpec.describe Item, type: :model do
   end
 
   describe 'class methods' do
+    describe '#find_one' do
+      it 'can find the first instance that matches a search' do
+        merchant_id = create(:merchant).id
+        create_list(:item, 5, merchant_id: merchant_id)
+
+        Item.first.update(name: 'no')
+        Item.second.update(name: 'no')
+        expected_item = Item.third
+        Item.fourth.update(name: 'no')
+        wrong_item = Item.fifth
+        wrong_item.update(name: expected_item.name)
+
+        search_name = expected_item.name.upcase
+
+        expect(Item.find_one(search_name).id).to eq expected_item.id
+        expect(Item.find_one(search_name).id).to_not eq wrong_item.id
+      end
+
+      it 'returns nil if no objects match the search' do
+        merchant_id = create(:merchant).id
+        create_list(:item, 5, merchant_id: merchant_id)
+
+        search_name = "I doubt there is an object in the list with this name"
+
+        expect(Item.find_one(search_name)).to eq nil
+      end
+    end
+
     describe '#find_all' do
       it 'can find all items containing a search string, case insensitive' do
         merchant_id = create(:merchant).id

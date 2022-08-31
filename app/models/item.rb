@@ -8,6 +8,10 @@ class Item < ApplicationRecord
   has_many :invoice_items
 
   def self.find_all(name)
-    items = where('name ILIKE ?', "%#{name}%")
+    where('name ILIKE ?', "%#{name}%")
+  end
+
+  def self.find_one(name)
+    find_by('name ILIKE ?', "%#{name}%")
   end
 end

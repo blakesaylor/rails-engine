@@ -1,6 +1,74 @@
 require 'rails_helper'
 
 describe "Items Search" do
+  it 'can find the first merchant whose name matches a search, case insensitive' do
+    merchant_id = create(:merchant).id
+    create_list(:item, 5, merchant_id: merchant_id)
+
+    Item.first.update(name: 'no')
+    Item.second.update(name: 'no')
+    expected_item = Item.third
+    Item.fourth.update(name: 'no')
+    Item.fifth.update(name: expected_item.name)
+    wrong_item = Item.fifth
+
+    search_name = expected_item.name.upcase
+
+    get "/api/v1/items/find?name=#{search_name}"
+
+    expect(response).to be_successful
+    expect(response.status).to eq 200
+
+    item = JSON.parse(response.body, symbolize_names: true)
+
+    expect(item[:data].count).to eq 3
+
+    expect(item[:data]).to have_key(:id)
+    expect(item[:data][:id]).to be_an(String)
+    expect(item[:data][:id].to_i).to eq expected_item.id
+
+    expect(item[:data]).to have_key(:type)
+    expect(item[:data][:type]).to be_an(String)
+    expect(item[:data][:type]).to eq('item')
+
+    expect(item[:data]).to have_key(:attributes)
+    expect(item[:data][:attributes]).to be_an(Hash)
+    expect(item[:data][:attributes][:name]).to eq Item.find(expected_item.id)[:name]
+  end
+
+  it 'returns a hash of no data is no objects with a name exist' do
+    merchant_id = create(:merchant).id
+    create_list(:item, 5, merchant_id: merchant_id)
+
+    search_name = "I doubt there is an object in the list with this name"
+
+    get "/api/v1/items/find?name=#{search_name}"
+
+    expect(response).to be_successful
+    expect(response.status).to eq 200
+
+    non_item = JSON.parse(response.body, symbolize_names: true)
+
+    expect(non_item[:data].count).to eq 0
+    expect(non_item[:data]).to eq({})
+  end
+
+  it 'returns a 400 if no parameter to find is passed in' do
+    get "/api/v1/items/find"
+
+    expect(response).to_not be_successful
+    expect(response.status).to eq 400
+  end
+  
+  it 'returns a 400 if the parameter to find is empty' do
+    search_name = ''
+
+    get "/api/v1/items/find?name=#{search_name}"
+
+    expect(response).to_not be_successful
+    expect(response.status).to eq 400
+  end
+
   it 'can find all items whose name matches a search, case insensitive' do
     merchant_id = create(:merchant).id
     create_list(:item, 5, merchant_id: merchant_id)
