@@ -1,6 +1,10 @@
 class Api::V1::Merchants::SearchController < ApplicationController
   def index
-    
+    if !params[:name].nil? && !params[:name].empty?
+      render json: MerchantSerializer.new(Merchant.find_all(params[:name]))
+    else
+      render status: 400
+    end
   end
 
   def show

@@ -6,4 +6,8 @@ class Merchant < ApplicationRecord
   def self.find_one(name)
     merchant = find_by('name ILIKE ?', "%#{name}%")
   end
+
+  def self.find_all(name)
+    merchants = where('name ILIKE ?', "%#{name}%")
+  end
 end
