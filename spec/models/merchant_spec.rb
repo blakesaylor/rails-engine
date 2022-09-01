@@ -28,8 +28,8 @@ RSpec.describe Merchant, type: :model do
 
         search_name = expected_merchant.name.upcase
 
-        expect(Merchant.find_one(search_name).id).to eq expected_merchant.id
-        expect(Merchant.find_one(search_name).id).to_not eq wrong_merchant.id
+        expect(Merchant.find_one_by_name(search_name).id).to eq expected_merchant.id
+        expect(Merchant.find_one_by_name(search_name).id).to_not eq wrong_merchant.id
       end
 
       it 'returns nil if no objects match the search' do
@@ -37,7 +37,7 @@ RSpec.describe Merchant, type: :model do
 
         search_name = "I doubt there is an object in the list with this name"
 
-        expect(Merchant.find_one(search_name)).to eq nil
+        expect(Merchant.find_one_by_name(search_name)).to eq nil
       end
     end
 
@@ -55,9 +55,9 @@ RSpec.describe Merchant, type: :model do
 
         merchant_ids = [ Merchant.second.id, Merchant.third.id, Merchant.fifth.id ]
 
-        expect(Merchant.find_all(search_name).count).to eq 3
+        expect(Merchant.find_all_by_name(search_name).count).to eq 3
 
-        Merchant.find_all(search_name).each do |merchant|
+        Merchant.find_all_by_name(search_name).each do |merchant|
           expect(merchant_ids.include?(merchant.id)).to eq true
         end
       end
@@ -67,7 +67,7 @@ RSpec.describe Merchant, type: :model do
 
         search_name = 'This is a long string that will test the method'
 
-        expect(Merchant.find_all(search_name)).to eq([]) 
+        expect(Merchant.find_all_by_name(search_name)).to eq([]) 
       end
     end
   end
