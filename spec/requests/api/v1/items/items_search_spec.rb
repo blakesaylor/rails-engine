@@ -199,6 +199,24 @@ describe "Items Search" do
       expect(item[:data][:attributes][:merchant_id]).to eq Item.third.merchant_id  
     end
 
+    it 'cannon have a minimum price greater than a maximum price when searching' do
+      merchant_id = create(:merchant).id
+      create_list(:item, 5, merchant_id: merchant_id)
+
+      minimum_price = 100
+      maximum_price = 90
+
+      get "/api/v1/items/find?min_price=#{minimum_price}&max_price=#{maximum_price}"
+
+      expect(response).to_not be_successful
+      expect(response.status).to eq 400
+
+      output = JSON.parse(response.body, symbolize_names: true)
+
+      expect(output).to have_key(:error)
+      expect(output[:error]).to eq "Minimum price must be greater than maximum price."
+    end
+
     it 'returns an empty hash of data if no items are found based on minimum price' do
       merchant_id = create(:merchant).id
       create_list(:item, 5, merchant_id: merchant_id)
@@ -500,25 +518,3 @@ describe "Items Search" do
     end
   end
 end
-
-  # it 'can find all items when searching by minimum price' do
-  #   merchant_id = create(:merchant).id
-  #   create_list(:item, 5, merchant_id: merchant_id)
-
-  #   # 3 items with price over 200
-  #   Item.first.update(unit_price: 9001.0)
-  #   Item.second.update(unit_price: 199.0)
-  #   Item.third.update(unit_price: 350.00)
-  #   Item.fourth.update(unit_price: 201)
-  #   Item.fifth.update(unit_price: 2)
-
-  #   min_price = 200
-  #   expected_ids = [ Item.first.id, Item.third.id, Item.fourth.id ]
-
-  #   get "/api/v1/items/find_all?min_price=#{min_price}"
-    
-  #   expect(response).to be_successful
-  #   expect(response.status).to eq 200
-
-  #   # Add the rest of the stuff
-  # end
