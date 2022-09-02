@@ -39,7 +39,7 @@ class Api::V1::Items::SearchController < ApplicationController
         render status: 400
       end
     elsif params[:min_price] && params[:max_price]
-      if params[:min_price] < params[:max_price]
+      if params[:min_price].to_f < params[:max_price].to_f
         item = Item.find_one_by_price(params[:min_price], params[:max_price])
         if !item.nil?
           render json: ItemSerializer.new(item)
@@ -71,8 +71,6 @@ class Api::V1::Items::SearchController < ApplicationController
           render json: { error: 'No items found based on search criteria.', data: {}}
         end
       end
-    else
-      render status: 400
     end
   end
 
