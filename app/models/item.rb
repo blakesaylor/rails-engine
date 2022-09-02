@@ -15,12 +15,11 @@ class Item < ApplicationRecord
     find_by('name ILIKE ?', "%#{name}%")
   end
 
-  def self.find_all_by_price(min = Item.minimum(:unit_price), max=Item.maximum(:unit_price))
-    where("unit_price >= #{min}").
-    where("unit_price <= #{max}")
+  def self.find_all_by_price(min = 0, max=Float::INFINITY)
+    where("unit_price >= ? AND unit_price <= ?", min.to_f, max.to_f).order(:name)
   end 
 
-  def self.find_one_by_price(min = Item.minimum(:unit_price), max=Item.maximum(:unit_price))
-    find_by("unit_price >= ? AND unit_price <= ?", min.to_f, max.to_f)
+  def self.find_one_by_price(min = 0, max = Float::INFINITY)
+    where("unit_price >= ? AND unit_price <= ?", min.to_f, max.to_f).order(:name).first
   end 
 end
